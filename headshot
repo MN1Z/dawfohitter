@@ -1,499 +1,361 @@
-– Dawfo Headshot Changer - Executor Compatible
-– Supports Mobile Dragging and RGB Theme
+-- DAWFO HEADSHOTTA
+-- Head Hitbox Expander with RGB UI
 
-local Players = game:GetService(“Players”)
-local UserInputService = game:GetService(“UserInputService”)
-local TweenService = game:GetService(“TweenService”)
-local RunService = game:GetService(“RunService”)
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild(“PlayerGui”)
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-– Settings
-local DEFAULT_SCALE = 5
-local MIN_SCALE = 5
-local MAX_SCALE = 50
+-- Clean up existing GUI
+if PlayerGui:FindFirstChild("DawfoHeadShotta") then
+    PlayerGui.DawfoHeadShotta:Destroy()
+end
 
-– Storage for original head sizes
+-- Create main GUI
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local HeadSizeFrame = Instance.new("Frame")
+local SizeLabel = Instance.new("TextLabel")
+local SizeSlider = Instance.new("TextBox")
+local SliderBar = Instance.new("Frame")
+local SliderButton = Instance.new("TextButton")
+local ApplyButton = Instance.new("TextButton")
+local ResetButton = Instance.new("TextButton")
+local StatusLabel = Instance.new("TextLabel")
+
+-- Properties
+ScreenGui.Name = "DawfoHeadShotta"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main Frame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+MainFrame.BorderColor3 = Color3.fromRGB(139, 0, 0)
+MainFrame.BorderSizePixel = 3
+MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+MainFrame.Size = UDim2.new(0, 350, 0, 280)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+-- Add corner rounding
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+-- Title Label
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "DAWFO HEADSHOTTA"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextScaled = true
+TitleLabel.TextStrokeColor3 = Color3.fromRGB(139, 0, 0)
+TitleLabel.TextStrokeTransparency = 0
+
+-- Head Size Frame
+HeadSizeFrame.Name = "HeadSizeFrame"
+HeadSizeFrame.Parent = MainFrame
+HeadSizeFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+HeadSizeFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
+HeadSizeFrame.BorderSizePixel = 2
+HeadSizeFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+HeadSizeFrame.Size = UDim2.new(0.9, 0, 0.3, 0)
+
+local HeadSizeCorner = Instance.new("UICorner")
+HeadSizeCorner.CornerRadius = UDim.new(0, 8)
+HeadSizeCorner.Parent = HeadSizeFrame
+
+-- Size Label
+SizeLabel.Name = "SizeLabel"
+SizeLabel.Parent = HeadSizeFrame
+SizeLabel.BackgroundTransparency = 1
+SizeLabel.Position = UDim2.new(0, 10, 0, 5)
+SizeLabel.Size = UDim2.new(0.6, 0, 0.4, 0)
+SizeLabel.Font = Enum.Font.Gotham
+SizeLabel.Text = "Head Size Multiplier:"
+SizeLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
+SizeLabel.TextScaled = true
+SizeLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Size Input
+SizeSlider.Name = "SizeSlider"
+SizeSlider.Parent = HeadSizeFrame
+SizeSlider.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+SizeSlider.BorderColor3 = Color3.fromRGB(139, 0, 0)
+SizeSlider.BorderSizePixel = 2
+SizeSlider.Position = UDim2.new(0.65, 0, 0.1, 0)
+SizeSlider.Size = UDim2.new(0.3, 0, 0.35, 0)
+SizeSlider.Font = Enum.Font.GothamBold
+SizeSlider.PlaceholderText = "5-50"
+SizeSlider.Text = "20"
+SizeSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+SizeSlider.TextScaled = true
+
+local SizeSliderCorner = Instance.new("UICorner")
+SizeSliderCorner.CornerRadius = UDim.new(0, 4)
+SizeSliderCorner.Parent = SizeSlider
+
+-- Slider Bar
+SliderBar.Name = "SliderBar"
+SliderBar.Parent = HeadSizeFrame
+SliderBar.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+SliderBar.BorderColor3 = Color3.fromRGB(139, 0, 0)
+SliderBar.BorderSizePixel = 1
+SliderBar.Position = UDim2.new(0.05, 0, 0.55, 0)
+SliderBar.Size = UDim2.new(0.7, 0, 0.15, 0)
+
+local SliderBarCorner = Instance.new("UICorner")
+SliderBarCorner.CornerRadius = UDim.new(0, 3)
+SliderBarCorner.Parent = SliderBar
+
+-- Slider Button
+SliderButton.Name = "SliderButton"
+SliderButton.Parent = SliderBar
+SliderButton.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+SliderButton.BorderSizePixel = 0
+SliderButton.Position = UDim2.new(0.33, 0, 0, 0)
+SliderButton.Size = UDim2.new(0, 20, 1, 0)
+SliderButton.Font = Enum.Font.Gotham
+SliderButton.Text = ""
+
+local SliderButtonCorner = Instance.new("UICorner")
+SliderButtonCorner.CornerRadius = UDim.new(0, 3)
+SliderButtonCorner.Parent = SliderButton
+
+-- Apply Button
+ApplyButton.Name = "ApplyButton"
+ApplyButton.Parent = MainFrame
+ApplyButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+ApplyButton.BorderColor3 = Color3.fromRGB(220, 20, 60)
+ApplyButton.BorderSizePixel = 2
+ApplyButton.Position = UDim2.new(0.05, 0, 0.6, 0)
+ApplyButton.Size = UDim2.new(0.4, 0, 0.15, 0)
+ApplyButton.Font = Enum.Font.GothamBold
+ApplyButton.Text = "APPLY"
+ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ApplyButton.TextScaled = true
+
+local ApplyCorner = Instance.new("UICorner")
+ApplyCorner.CornerRadius = UDim.new(0, 6)
+ApplyCorner.Parent = ApplyButton
+
+-- Reset Button
+ResetButton.Name = "ResetButton"
+ResetButton.Parent = MainFrame
+ResetButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+ResetButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+ResetButton.BorderSizePixel = 2
+ResetButton.Position = UDim2.new(0.55, 0, 0.6, 0)
+ResetButton.Size = UDim2.new(0.4, 0, 0.15, 0)
+ResetButton.Font = Enum.Font.GothamBold
+ResetButton.Text = "RESET"
+ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ResetButton.TextScaled = true
+
+local ResetCorner = Instance.new("UICorner")
+ResetCorner.CornerRadius = UDim.new(0, 6)
+ResetCorner.Parent = ResetButton
+
+-- Status Label
+StatusLabel.Name = "StatusLabel"
+StatusLabel.Parent = MainFrame
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Position = UDim2.new(0.05, 0, 0.8, 0)
+StatusLabel.Size = UDim2.new(0.9, 0, 0.15, 0)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.Text = "Ready to modify heads..."
+StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
+StatusLabel.TextScaled = true
+
+-- Variables
 local originalHeadSizes = {}
-local currentScale = DEFAULT_SCALE
-
-– RGB Animation
-local rgbHue = 0
-
-– Function to get RGB color
-local function getRGBColor()
-return Color3.fromHSV(rgbHue, 1, 1)
-end
-
-– Function to change head hitbox size
-local function changeHeadSize(targetPlayer, scale)
-if targetPlayer.Character and targetPlayer.Character:FindFirstChild(“Head”) then
-local head = targetPlayer.Character.Head
-
-```
-    -- Store original size if not already stored
-    if not originalHeadSizes[targetPlayer] then
-        originalHeadSizes[targetPlayer] = head.Size
-    end
-    
-    -- Calculate new size based on scale
-    local originalSize = originalHeadSizes[targetPlayer]
-    local multiplier = scale / 5 -- 5 is the base scale
-    local newSize = originalSize * multiplier
-    
-    -- Apply new size
-    head.Size = newSize
-    
-    -- Update SpecialMesh if it exists
-    if head:FindFirstChild("Mesh") then
-        local mesh = head.Mesh
-        mesh.Scale = Vector3.new(multiplier, multiplier, multiplier)
-    end
-    
-    -- Update collision box if exists
-    if head:FindFirstChild("OriginalSize") then
-        head.OriginalSize.Value = newSize
-    end
-end
-```
-
-end
-
-– Function to apply head size to all players
-local function applyToAllPlayers(scale)
-for _, targetPlayer in pairs(Players:GetPlayers()) do
-changeHeadSize(targetPlayer, scale)
-end
-end
-
-– Apply to new players when they spawn
-local function onPlayerAdded(targetPlayer)
-local function onCharacterAdded(character)
-wait(0.5) – Wait for character to fully load
-changeHeadSize(targetPlayer, currentScale)
-end
-
-```
-targetPlayer.CharacterAdded:Connect(onCharacterAdded)
-if targetPlayer.Character then
-    spawn(function()
-        onCharacterAdded(targetPlayer.Character)
-    end)
-end
-```
-
-end
-
-– Connect to existing and new players
-Players.PlayerAdded:Connect(onPlayerAdded)
-for _, targetPlayer in pairs(Players:GetPlayers()) do
-onPlayerAdded(targetPlayer)
-end
-
-– Clean up when player leaves
-Players.PlayerRemoving:Connect(function(targetPlayer)
-originalHeadSizes[targetPlayer] = nil
-end)
-
-– Create GUI
-local screenGui = Instance.new(“ScreenGui”)
-screenGui.Name = “DawfoHeadshotChanger”
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-– Check if GUI already exists and remove it
-if playerGui:FindFirstChild(“DawfoHeadshotChanger”) then
-playerGui:FindFirstChild(“DawfoHeadshotChanger”):Destroy()
-end
-
-screenGui.Parent = playerGui
-
-– Main Frame
-local mainFrame = Instance.new(“Frame”)
-mainFrame.Name = “MainFrame”
-mainFrame.Size = UDim2.new(0, 320, 0, 220)
-mainFrame.Position = UDim2.new(0, 50, 0, 50)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.ZIndex = 1
-mainFrame.Parent = screenGui
-
-– Add shadow effect
-local shadow = Instance.new(“Frame”)
-shadow.Name = “Shadow”
-shadow.Size = UDim2.new(1, 6, 1, 6)
-shadow.Position = UDim2.new(0, -3, 0, -3)
-shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-shadow.BackgroundTransparency = 0.5
-shadow.BorderSizePixel = 0
-shadow.ZIndex = 0
-shadow.Parent = mainFrame
-
-local shadowCorner = Instance.new(“UICorner”)
-shadowCorner.CornerRadius = UDim.new(0, 12)
-shadowCorner.Parent = shadow
-
-– Add corner radius
-local corner = Instance.new(“UICorner”)
-corner.CornerRadius = UDim.new(0, 10)
-corner.Parent = mainFrame
-
-– RGB Border
-local rgbBorder = Instance.new(“Frame”)
-rgbBorder.Name = “RGBBorder”
-rgbBorder.Size = UDim2.new(1, 4, 1, 4)
-rgbBorder.Position = UDim2.new(0, -2, 0, -2)
-rgbBorder.BackgroundColor3 = getRGBColor()
-rgbBorder.BorderSizePixel = 0
-rgbBorder.ZIndex = 0
-rgbBorder.Parent = mainFrame
-
-local rgbCorner = Instance.new(“UICorner”)
-rgbCorner.CornerRadius = UDim.new(0, 12)
-rgbCorner.Parent = rgbBorder
-
-– Title
-local titleLabel = Instance.new(“TextLabel”)
-titleLabel.Name = “Title”
-titleLabel.Size = UDim2.new(1, 0, 0, 45)
-titleLabel.Position = UDim2.new(0, 0, 0, 0)
-titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-titleLabel.BorderSizePixel = 0
-titleLabel.Text = “🎯 Dawfo Headshot Changer”
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 16
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.ZIndex = 2
-titleLabel.Parent = mainFrame
-
-– Title corner
-local titleCorner = Instance.new(“UICorner”)
-titleCorner.CornerRadius = UDim.new(0, 10)
-titleCorner.Parent = titleLabel
-
-– Close Button
-local closeButton = Instance.new(“TextButton”)
-closeButton.Name = “CloseButton”
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -35, 0, 7.5)
-closeButton.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-closeButton.BorderSizePixel = 0
-closeButton.Text = “✕”
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.TextSize = 14
-closeButton.Font = Enum.Font.GothamBold
-closeButton.ZIndex = 3
-closeButton.Parent = mainFrame
-
-local closeCorner = Instance.new(“UICorner”)
-closeCorner.CornerRadius = UDim.new(0, 15)
-closeCorner.Parent = closeButton
-
-– Scale Info Frame
-local infoFrame = Instance.new(“Frame”)
-infoFrame.Name = “InfoFrame”
-infoFrame.Size = UDim2.new(1, -20, 0, 35)
-infoFrame.Position = UDim2.new(0, 10, 0, 55)
-infoFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-infoFrame.BorderSizePixel = 0
-infoFrame.ZIndex = 2
-infoFrame.Parent = mainFrame
-
-local infoCorner = Instance.new(“UICorner”)
-infoCorner.CornerRadius = UDim.new(0, 8)
-infoCorner.Parent = infoFrame
-
-– Scale Label
-local scaleLabel = Instance.new(“TextLabel”)
-scaleLabel.Name = “ScaleLabel”
-scaleLabel.Size = UDim2.new(1, -10, 1, 0)
-scaleLabel.Position = UDim2.new(0, 5, 0, 0)
-scaleLabel.BackgroundTransparency = 1
-scaleLabel.Text = “Head Scale: “ .. currentScale
-scaleLabel.TextColor3 = getRGBColor()
-scaleLabel.TextSize = 14
-scaleLabel.Font = Enum.Font.GothamBold
-scaleLabel.ZIndex = 3
-scaleLabel.Parent = infoFrame
-
-– Slider Frame
-local sliderFrame = Instance.new(“Frame”)
-sliderFrame.Name = “SliderFrame”
-sliderFrame.Size = UDim2.new(1, -20, 0, 45)
-sliderFrame.Position = UDim2.new(0, 10, 0, 105)
-sliderFrame.BackgroundTransparency = 1
-sliderFrame.ZIndex = 2
-sliderFrame.Parent = mainFrame
-
-– Slider Background
-local sliderBg = Instance.new(“Frame”)
-sliderBg.Name = “SliderBg”
-sliderBg.Size = UDim2.new(1, -60, 0, 25)
-sliderBg.Position = UDim2.new(0, 30, 0, 10)
-sliderBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-sliderBg.BorderSizePixel = 0
-sliderBg.ZIndex = 2
-sliderBg.Parent = sliderFrame
-
-local sliderCorner = Instance.new(“UICorner”)
-sliderCorner.CornerRadius = UDim.new(0, 12)
-sliderCorner.Parent = sliderBg
-
-– Slider Fill
-local sliderFill = Instance.new(“Frame”)
-sliderFill.Name = “SliderFill”
-sliderFill.Size = UDim2.new(0, 0, 1, 0)
-sliderFill.Position = UDim2.new(0, 0, 0, 0)
-sliderFill.BackgroundColor3 = getRGBColor()
-sliderFill.BorderSizePixel = 0
-sliderFill.ZIndex = 3
-sliderFill.Parent = sliderBg
-
-local fillCorner = Instance.new(“UICorner”)
-fillCorner.CornerRadius = UDim.new(0, 12)
-fillCorner.Parent = sliderFill
-
-– Slider Button
-local sliderButton = Instance.new(“Frame”)
-sliderButton.Name = “SliderButton”
-sliderButton.Size = UDim2.new(0, 30, 0, 30)
-sliderButton.Position = UDim2.new(0, -15, 0, -2.5)
-sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-sliderButton.BorderSizePixel = 0
-sliderButton.ZIndex = 4
-sliderButton.Parent = sliderBg
-
-local buttonCorner = Instance.new(“UICorner”)
-buttonCorner.CornerRadius = UDim.new(0, 15)
-buttonCorner.Parent = sliderButton
-
-– Button inner circle
-local innerCircle = Instance.new(“Frame”)
-innerCircle.Name = “InnerCircle”
-innerCircle.Size = UDim2.new(0, 20, 0, 20)
-innerCircle.Position = UDim2.new(0, 5, 0, 5)
-innerCircle.BackgroundColor3 = getRGBColor()
-innerCircle.BorderSizePixel = 0
-innerCircle.ZIndex = 5
-innerCircle.Parent = sliderButton
-
-local innerCorner = Instance.new(“UICorner”)
-innerCorner.CornerRadius = UDim.new(0, 10)
-innerCorner.Parent = innerCircle
-
-– Min/Max Labels
-local minLabel = Instance.new(“TextLabel”)
-minLabel.Size = UDim2.new(0, 25, 0, 25)
-minLabel.Position = UDim2.new(0, 0, 0, 10)
-minLabel.BackgroundTransparency = 1
-minLabel.Text = “5”
-minLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-minLabel.TextSize = 12
-minLabel.Font = Enum.Font.GothamBold
-minLabel.ZIndex = 3
-minLabel.Parent = sliderFrame
-
-local maxLabel = Instance.new(“TextLabel”)
-maxLabel.Size = UDim2.new(0, 25, 0, 25)
-maxLabel.Position = UDim2.new(1, -25, 0, 10)
-maxLabel.BackgroundTransparency = 1
-maxLabel.Text = “50”
-maxLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-maxLabel.TextSize = 12
-maxLabel.Font = Enum.Font.GothamBold
-maxLabel.ZIndex = 3
-maxLabel.Parent = sliderFrame
-
-– Buttons Frame
-local buttonsFrame = Instance.new(“Frame”)
-buttonsFrame.Name = “ButtonsFrame”
-buttonsFrame.Size = UDim2.new(1, -20, 0, 40)
-buttonsFrame.Position = UDim2.new(0, 10, 0, 170)
-buttonsFrame.BackgroundTransparency = 1
-buttonsFrame.ZIndex = 2
-buttonsFrame.Parent = mainFrame
-
-– Reset Button
-local resetButton = Instance.new(“TextButton”)
-resetButton.Name = “ResetButton”
-resetButton.Size = UDim2.new(0.45, 0, 1, 0)
-resetButton.Position = UDim2.new(0, 0, 0, 0)
-resetButton.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-resetButton.BorderSizePixel = 0
-resetButton.Text = “🔄 Reset”
-resetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-resetButton.TextSize = 12
-resetButton.Font = Enum.Font.GothamBold
-resetButton.ZIndex = 3
-resetButton.Parent = buttonsFrame
-
-local resetCorner = Instance.new(“UICorner”)
-resetCorner.CornerRadius = UDim.new(0, 8)
-resetCorner.Parent = resetButton
-
-– Apply Button
-local applyButton = Instance.new(“TextButton”)
-applyButton.Name = “ApplyButton”
-applyButton.Size = UDim2.new(0.45, 0, 1, 0)
-applyButton.Position = UDim2.new(0.55, 0, 0, 0)
-applyButton.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
-applyButton.BorderSizePixel = 0
-applyButton.Text = “✓ Apply”
-applyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-applyButton.TextSize = 12
-applyButton.Font = Enum.Font.GothamBold
-applyButton.ZIndex = 3
-applyButton.Parent = buttonsFrame
-
-local applyCorner = Instance.new(“UICorner”)
-applyCorner.CornerRadius = UDim.new(0, 8)
-applyCorner.Parent = applyButton
-
-– Dragging System (Mobile & Desktop Compatible)
 local isDragging = false
 local dragStart = nil
 local startPos = nil
 
-local function startDrag(input)
-isDragging = true
-dragStart = input.Position
-startPos = mainFrame.Position
-end
-
-local function updateDrag(input)
-if isDragging then
-local delta = input.Position - dragStart
-mainFrame.Position = UDim2.new(
-startPos.X.Scale,
-startPos.X.Offset + delta.X,
-startPos.Y.Scale,
-startPos.Y.Offset + delta.Y
-)
-end
-end
-
-local function stopDrag()
-isDragging = false
-end
-
-– Title dragging events
-titleLabel.InputBegan:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-startDrag(input)
-end
+-- RGB Animation
+spawn(function()
+    while ScreenGui.Parent do
+        for i = 0, 1, 0.01 do
+            if not ScreenGui.Parent then break end
+            local hue = i
+            local rgb = Color3.fromHSV(hue, 1, 1)
+            MainFrame.BorderColor3 = rgb
+            TitleLabel.TextStrokeColor3 = rgb
+            SliderButton.BackgroundColor3 = rgb
+            ApplyButton.BorderColor3 = rgb
+            wait(0.05)
+        end
+    end
 end)
 
-titleLabel.InputChanged:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-updateDrag(input)
-end
-end)
-
-titleLabel.InputEnded:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-stopDrag()
-end
-end)
-
-– Slider Logic
-local isSliderDragging = false
-
-local function updateSlider(scale)
-currentScale = math.clamp(scale, MIN_SCALE, MAX_SCALE)
-local percentage = (currentScale - MIN_SCALE) / (MAX_SCALE - MIN_SCALE)
-
-```
--- Update button position
-sliderButton.Position = UDim2.new(percentage, -15, 0, -2.5)
-
--- Update fill
-sliderFill.Size = UDim2.new(percentage, 0, 1, 0)
-
--- Update label
-scaleLabel.Text = "Head Scale: " .. math.floor(currentScale)
-```
-
+-- Slider functionality
+local function updateSlider(value)
+    value = math.clamp(value, 5, 50)
+    SizeSlider.Text = tostring(value)
+    local percentage = (value - 5) / 45
+    SliderButton.Position = UDim2.new(percentage * 0.9, 0, 0, 0)
 end
 
-local function getSliderValue(input)
-local sliderPos = sliderBg.AbsolutePosition
-local sliderSize = sliderBg.AbsoluteSize
-local inputPos = input.Position
-
-```
-local relativeX = inputPos.X - sliderPos.X
-local percentage = math.clamp(relativeX / sliderSize.X, 0, 1)
-
-return MIN_SCALE + (percentage * (MAX_SCALE - MIN_SCALE))
-```
-
-end
-
-– Slider dragging events
-sliderButton.InputBegan:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-isSliderDragging = true
-end
-end)
-
-sliderBg.InputBegan:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-local newScale = getSliderValue(input)
-updateSlider(newScale)
-isSliderDragging = true
-end
+-- Slider dragging
+SliderButton.MouseButton1Down:Connect(function()
+    isDragging = true
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-if isSliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-local newScale = getSliderValue(input)
-updateSlider(newScale)
-end
+    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local sliderPos = SliderBar.AbsolutePosition.X
+        local sliderSize = SliderBar.AbsoluteSize.X
+        local mousePos = input.Position.X
+        
+        local percentage = math.clamp((mousePos - sliderPos) / sliderSize, 0, 0.9)
+        local value = math.floor(5 + (percentage * 45))
+        
+        updateSlider(value)
+    end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-isSliderDragging = false
-end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = false
+    end
 end)
 
-– Button events
-resetButton.MouseButton1Click:Connect(function()
-updateSlider(DEFAULT_SCALE)
-applyToAllPlayers(currentScale)
+-- Text input handling
+SizeSlider.FocusLost:Connect(function()
+    local value = tonumber(SizeSlider.Text)
+    if value then
+        value = math.clamp(value, 5, 50)
+        updateSlider(value)
+    else
+        updateSlider(20)
+    end
 end)
 
-applyButton.MouseButton1Click:Connect(function()
-applyToAllPlayers(currentScale)
-end)
-
-closeButton.MouseButton1Click:Connect(function()
-screenGui:Destroy()
-end)
-
-– RGB Animation
-spawn(function()
-while screenGui.Parent do
-rgbHue = (rgbHue + 0.01) % 1
-local newColor = getRGBColor()
-
-```
-    rgbBorder.BackgroundColor3 = newColor
-    sliderFill.BackgroundColor3 = newColor
-    innerCircle.BackgroundColor3 = newColor
-    scaleLabel.TextColor3 = newColor
+-- Head modification functions
+local function modifyHead(player, multiplier)
+    if player == LocalPlayer then return end
     
-    wait(0.1)
+    local character = player.Character
+    if not character then return end
+    
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+    
+    -- Store original size if not already stored
+    if not originalHeadSizes[player] then
+        originalHeadSizes[player] = head.Size
+    end
+    
+    -- Apply new size
+    head.Size = originalHeadSizes[player] * multiplier
+    head.Transparency = 0.5
+    
+    -- Update hitbox
+    if head:FindFirstChild("Mesh") then
+        head.Mesh.Scale = Vector3.new(multiplier, multiplier, multiplier)
+    end
 end
-```
 
+local function resetHead(player)
+    if player == LocalPlayer then return end
+    
+    local character = player.Character
+    if not character then return end
+    
+    local head = character:FindFirstChild("Head")
+    if not head or not originalHeadSizes[player] then return end
+    
+    -- Restore original size
+    head.Size = originalHeadSizes[player]
+    head.Transparency = 0
+    
+    -- Reset hitbox
+    if head:FindFirstChild("Mesh") then
+        head.Mesh.Scale = Vector3.new(1, 1, 1)
+    end
+end
+
+-- Apply button
+ApplyButton.MouseButton1Click:Connect(function()
+    local multiplier = tonumber(SizeSlider.Text) or 20
+    multiplier = math.clamp(multiplier, 5, 50)
+    
+    local count = 0
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            modifyHead(player, multiplier)
+            count = count + 1
+        end
+    end
+    
+    StatusLabel.Text = string.format("Modified %d heads with %dx multiplier", count, multiplier)
+    
+    -- Button feedback
+    ApplyButton.BackgroundColor3 = Color3.fromRGB(60, 179, 113)
+    wait(0.2)
+    ApplyButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 end)
 
-– Initialize
-updateSlider(DEFAULT_SCALE)
-applyToAllPlayers(currentScale)
+-- Reset button
+ResetButton.MouseButton1Click:Connect(function()
+    local count = 0
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            resetHead(player)
+            count = count + 1
+        end
+    end
+    
+    originalHeadSizes = {}
+    StatusLabel.Text = string.format("Reset %d heads to normal", count)
+    
+    -- Button feedback
+    ResetButton.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+    wait(0.2)
+    ResetButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+end)
 
-print(“✅ Dawfo Headshot Changer loaded successfully!”)
-print(“🎯 Script by Dawfo - Mobile & Desktop Compatible”)
+-- Handle new players
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        wait(1) -- Wait for character to fully load
+        if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
+            modifyHead(player, tonumber(SizeSlider.Text))
+        end
+    end)
+end)
+
+-- Handle existing players respawning
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function()
+            wait(1)
+            if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
+                modifyHead(player, tonumber(SizeSlider.Text))
+            end
+        end)
+    end
+end
+
+-- Mobile support improvements
+if UserInputService.TouchEnabled then
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    
+    -- Improve touch responsiveness
+    for _, button in pairs({ApplyButton, ResetButton, SliderButton}) do
+        button.AutoButtonColor = false
+    end
+end
+
+StatusLabel.Text = "DAWFO HEADSHOTTA loaded successfully!"
