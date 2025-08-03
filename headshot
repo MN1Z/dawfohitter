@@ -1,20 +1,21 @@
--- DAWFO HEADSHOTTA
--- Head Hitbox Expander with RGB UI
+-- DAWFO HEADSHOTTA V2
+-- Head Hitbox Expander + Player/NPC Teleporter with RGB UI
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Clean up existing GUI
-if PlayerGui:FindFirstChild("DawfoHeadShotta") then
-    PlayerGui.DawfoHeadShotta:Destroy()
+if CoreGui:FindFirstChild("DawfoHeadShotta") then
+    CoreGui.DawfoHeadShotta:Destroy()
 end
 
--- Create main GUI
+-- Create main GUI in CoreGui for persistence
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local TitleLabel = Instance.new("TextLabel")
@@ -25,35 +26,64 @@ local SliderBar = Instance.new("Frame")
 local SliderButton = Instance.new("TextButton")
 local ApplyButton = Instance.new("TextButton")
 local ResetButton = Instance.new("TextButton")
+local TeleportFrame = Instance.new("Frame")
+local TeleportLabel = Instance.new("TextLabel")
+local TeleportButton = Instance.new("TextButton")
 local StatusLabel = Instance.new("TextLabel")
+local CloseButton = Instance.new("TextButton")
 
 -- Properties
 ScreenGui.Name = "DawfoHeadShotta"
-ScreenGui.Parent = PlayerGui
+ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- Main Frame
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
 MainFrame.BorderColor3 = Color3.fromRGB(139, 0, 0)
 MainFrame.BorderSizePixel = 3
 MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
-MainFrame.Size = UDim2.new(0, 350, 0, 280)
+MainFrame.Size = UDim2.new(0, 380, 0, 400)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
+-- Add gradient background
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 0, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 0, 0))
+}
+Gradient.Rotation = 45
+Gradient.Parent = MainFrame
+
 -- Add corner rounding
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.CornerRadius = UDim.new(0, 15)
 MainCorner.Parent = MainFrame
+
+-- Close Button
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = MainFrame
+CloseButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+CloseButton.BorderSizePixel = 0
+CloseButton.Position = UDim2.new(0.9, 0, 0.02, 0)
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Text = "×"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextScaled = true
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 15)
+CloseCorner.Parent = CloseButton
 
 -- Title Label
 TitleLabel.Name = "TitleLabel"
 TitleLabel.Parent = MainFrame
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Position = UDim2.new(0, 0, 0, 0)
-TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.Size = UDim2.new(0.85, 0, 0, 45)
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.Text = "DAWFO HEADSHOTTA"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -67,11 +97,11 @@ HeadSizeFrame.Parent = MainFrame
 HeadSizeFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
 HeadSizeFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
 HeadSizeFrame.BorderSizePixel = 2
-HeadSizeFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-HeadSizeFrame.Size = UDim2.new(0.9, 0, 0.3, 0)
+HeadSizeFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+HeadSizeFrame.Size = UDim2.new(0.9, 0, 0.25, 0)
 
 local HeadSizeCorner = Instance.new("UICorner")
-HeadSizeCorner.CornerRadius = UDim.new(0, 8)
+HeadSizeCorner.CornerRadius = UDim.new(0, 10)
 HeadSizeCorner.Parent = HeadSizeFrame
 
 -- Size Label
@@ -79,7 +109,7 @@ SizeLabel.Name = "SizeLabel"
 SizeLabel.Parent = HeadSizeFrame
 SizeLabel.BackgroundTransparency = 1
 SizeLabel.Position = UDim2.new(0, 10, 0, 5)
-SizeLabel.Size = UDim2.new(0.6, 0, 0.4, 0)
+SizeLabel.Size = UDim2.new(0.6, 0, 0.3, 0)
 SizeLabel.Font = Enum.Font.Gotham
 SizeLabel.Text = "Head Size Multiplier:"
 SizeLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
@@ -92,7 +122,7 @@ SizeSlider.Parent = HeadSizeFrame
 SizeSlider.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
 SizeSlider.BorderColor3 = Color3.fromRGB(139, 0, 0)
 SizeSlider.BorderSizePixel = 2
-SizeSlider.Position = UDim2.new(0.65, 0, 0.1, 0)
+SizeSlider.Position = UDim2.new(0.65, 0, 0.05, 0)
 SizeSlider.Size = UDim2.new(0.3, 0, 0.35, 0)
 SizeSlider.Font = Enum.Font.GothamBold
 SizeSlider.PlaceholderText = "5-50"
@@ -101,7 +131,7 @@ SizeSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
 SizeSlider.TextScaled = true
 
 local SizeSliderCorner = Instance.new("UICorner")
-SizeSliderCorner.CornerRadius = UDim.new(0, 4)
+SizeSliderCorner.CornerRadius = UDim.new(0, 6)
 SizeSliderCorner.Parent = SizeSlider
 
 -- Slider Bar
@@ -114,7 +144,7 @@ SliderBar.Position = UDim2.new(0.05, 0, 0.55, 0)
 SliderBar.Size = UDim2.new(0.7, 0, 0.15, 0)
 
 local SliderBarCorner = Instance.new("UICorner")
-SliderBarCorner.CornerRadius = UDim.new(0, 3)
+SliderBarCorner.CornerRadius = UDim.new(0, 5)
 SliderBarCorner.Parent = SliderBar
 
 -- Slider Button
@@ -123,12 +153,12 @@ SliderButton.Parent = SliderBar
 SliderButton.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
 SliderButton.BorderSizePixel = 0
 SliderButton.Position = UDim2.new(0.33, 0, 0, 0)
-SliderButton.Size = UDim2.new(0, 20, 1, 0)
+SliderButton.Size = UDim2.new(0, 25, 1, 0)
 SliderButton.Font = Enum.Font.Gotham
 SliderButton.Text = ""
 
 local SliderButtonCorner = Instance.new("UICorner")
-SliderButtonCorner.CornerRadius = UDim.new(0, 3)
+SliderButtonCorner.CornerRadius = UDim.new(0, 5)
 SliderButtonCorner.Parent = SliderButton
 
 -- Apply Button
@@ -137,15 +167,15 @@ ApplyButton.Parent = MainFrame
 ApplyButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 ApplyButton.BorderColor3 = Color3.fromRGB(220, 20, 60)
 ApplyButton.BorderSizePixel = 2
-ApplyButton.Position = UDim2.new(0.05, 0, 0.6, 0)
-ApplyButton.Size = UDim2.new(0.4, 0, 0.15, 0)
+ApplyButton.Position = UDim2.new(0.05, 0, 0.45, 0)
+ApplyButton.Size = UDim2.new(0.4, 0, 0.12, 0)
 ApplyButton.Font = Enum.Font.GothamBold
-ApplyButton.Text = "APPLY"
+ApplyButton.Text = "APPLY HEADS"
 ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ApplyButton.TextScaled = true
 
 local ApplyCorner = Instance.new("UICorner")
-ApplyCorner.CornerRadius = UDim.new(0, 6)
+ApplyCorner.CornerRadius = UDim.new(0, 8)
 ApplyCorner.Parent = ApplyButton
 
 -- Reset Button
@@ -154,33 +184,75 @@ ResetButton.Parent = MainFrame
 ResetButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
 ResetButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
 ResetButton.BorderSizePixel = 2
-ResetButton.Position = UDim2.new(0.55, 0, 0.6, 0)
-ResetButton.Size = UDim2.new(0.4, 0, 0.15, 0)
+ResetButton.Position = UDim2.new(0.55, 0, 0.45, 0)
+ResetButton.Size = UDim2.new(0.4, 0, 0.12, 0)
 ResetButton.Font = Enum.Font.GothamBold
-ResetButton.Text = "RESET"
+ResetButton.Text = "RESET HEADS"
 ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ResetButton.TextScaled = true
 
 local ResetCorner = Instance.new("UICorner")
-ResetCorner.CornerRadius = UDim.new(0, 6)
+ResetCorner.CornerRadius = UDim.new(0, 8)
 ResetCorner.Parent = ResetButton
+
+-- Teleport Frame
+TeleportFrame.Name = "TeleportFrame"
+TeleportFrame.Parent = MainFrame
+TeleportFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+TeleportFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
+TeleportFrame.BorderSizePixel = 2
+TeleportFrame.Position = UDim2.new(0.05, 0, 0.62, 0)
+TeleportFrame.Size = UDim2.new(0.9, 0, 0.15, 0)
+
+local TeleportCorner = Instance.new("UICorner")
+TeleportCorner.CornerRadius = UDim.new(0, 10)
+TeleportCorner.Parent = TeleportFrame
+
+-- Teleport Label
+TeleportLabel.Name = "TeleportLabel"
+TeleportLabel.Parent = TeleportFrame
+TeleportLabel.BackgroundTransparency = 1
+TeleportLabel.Position = UDim2.new(0, 10, 0, 0)
+TeleportLabel.Size = UDim2.new(0.6, 0, 1, 0)
+TeleportLabel.Font = Enum.Font.Gotham
+TeleportLabel.Text = "Loop Teleport Players/NPCs:"
+TeleportLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
+TeleportLabel.TextScaled = true
+TeleportLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Teleport Button
+TeleportButton.Name = "TeleportButton"
+TeleportButton.Parent = TeleportFrame
+TeleportButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+TeleportButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+TeleportButton.BorderSizePixel = 2
+TeleportButton.Position = UDim2.new(0.65, 0, 0.15, 0)
+TeleportButton.Size = UDim2.new(0.3, 0, 0.7, 0)
+TeleportButton.Font = Enum.Font.GothamBold
+TeleportButton.Text = "OFF"
+TeleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportButton.TextScaled = true
+
+local TeleportButtonCorner = Instance.new("UICorner")
+TeleportButtonCorner.CornerRadius = UDim.new(0, 6)
+TeleportButtonCorner.Parent = TeleportButton
 
 -- Status Label
 StatusLabel.Name = "StatusLabel"
 StatusLabel.Parent = MainFrame
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(0.05, 0, 0.8, 0)
+StatusLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
 StatusLabel.Size = UDim2.new(0.9, 0, 0.15, 0)
 StatusLabel.Font = Enum.Font.Gotham
-StatusLabel.Text = "Ready to modify heads..."
+StatusLabel.Text = "Ready to modify heads and teleport..."
 StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
 StatusLabel.TextScaled = true
 
 -- Variables
 local originalHeadSizes = {}
 local isDragging = false
-local dragStart = nil
-local startPos = nil
+local teleportLoop = false
+local teleportConnection = nil
 
 -- RGB Animation
 spawn(function()
@@ -193,9 +265,14 @@ spawn(function()
             TitleLabel.TextStrokeColor3 = rgb
             SliderButton.BackgroundColor3 = rgb
             ApplyButton.BorderColor3 = rgb
-            wait(0.05)
+            wait(0.03)
         end
     end
+end)
+
+-- Close button functionality
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
 end)
 
 -- Slider functionality
@@ -203,7 +280,7 @@ local function updateSlider(value)
     value = math.clamp(value, 5, 50)
     SizeSlider.Text = tostring(value)
     local percentage = (value - 5) / 45
-    SliderButton.Position = UDim2.new(percentage * 0.9, 0, 0, 0)
+    SliderButton.Position = UDim2.new(percentage * 0.85, 0, 0, 0)
 end
 
 -- Slider dragging
@@ -217,7 +294,7 @@ UserInputService.InputChanged:Connect(function(input)
         local sliderSize = SliderBar.AbsoluteSize.X
         local mousePos = input.Position.X
         
-        local percentage = math.clamp((mousePos - sliderPos) / sliderSize, 0, 0.9)
+        local percentage = math.clamp((mousePos - sliderPos) / sliderSize, 0, 0.85)
         local value = math.floor(5 + (percentage * 45))
         
         updateSlider(value)
@@ -241,48 +318,73 @@ SizeSlider.FocusLost:Connect(function()
     end
 end)
 
+-- Get all characters (players and NPCs)
+local function getAllCharacters()
+    local characters = {}
+    
+    -- Get player characters
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            table.insert(characters, {character = player.Character, name = player.Name, isPlayer = true})
+        end
+    end
+    
+    -- Get NPC characters
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("Head") then
+            local isPlayerCharacter = false
+            for _, player in pairs(Players:GetPlayers()) do
+                if player.Character == obj then
+                    isPlayerCharacter = true
+                    break
+                end
+            end
+            
+            if not isPlayerCharacter and obj ~= LocalPlayer.Character then
+                table.insert(characters, {character = obj, name = obj.Name, isPlayer = false})
+            end
+        end
+    end
+    
+    return characters
+end
+
 -- Head modification functions
-local function modifyHead(player, multiplier)
-    if player == LocalPlayer then return end
-    
-    local character = player.Character
-    if not character then return end
-    
+local function modifyHead(character, multiplier)
     local head = character:FindFirstChild("Head")
-    if not head then return end
+    if not head then return false end
     
     -- Store original size if not already stored
-    if not originalHeadSizes[player] then
-        originalHeadSizes[player] = head.Size
+    if not originalHeadSizes[character] then
+        originalHeadSizes[character] = head.Size
     end
     
     -- Apply new size
-    head.Size = originalHeadSizes[player] * multiplier
-    head.Transparency = 0.5
+    head.Size = originalHeadSizes[character] * multiplier
+    head.Transparency = 0.3
     
-    -- Update hitbox
+    -- Update mesh if exists
     if head:FindFirstChild("Mesh") then
         head.Mesh.Scale = Vector3.new(multiplier, multiplier, multiplier)
     end
+    
+    return true
 end
 
-local function resetHead(player)
-    if player == LocalPlayer then return end
-    
-    local character = player.Character
-    if not character then return end
-    
+local function resetHead(character)
     local head = character:FindFirstChild("Head")
-    if not head or not originalHeadSizes[player] then return end
+    if not head or not originalHeadSizes[character] then return false end
     
     -- Restore original size
-    head.Size = originalHeadSizes[player]
+    head.Size = originalHeadSizes[character]
     head.Transparency = 0
     
-    -- Reset hitbox
+    -- Reset mesh
     if head:FindFirstChild("Mesh") then
         head.Mesh.Scale = Vector3.new(1, 1, 1)
     end
+    
+    return true
 end
 
 -- Apply button
@@ -290,10 +392,11 @@ ApplyButton.MouseButton1Click:Connect(function()
     local multiplier = tonumber(SizeSlider.Text) or 20
     multiplier = math.clamp(multiplier, 5, 50)
     
+    local characters = getAllCharacters()
     local count = 0
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            modifyHead(player, multiplier)
+    
+    for _, data in pairs(characters) do
+        if modifyHead(data.character, multiplier) then
             count = count + 1
         end
     end
@@ -308,10 +411,11 @@ end)
 
 -- Reset button
 ResetButton.MouseButton1Click:Connect(function()
+    local characters = getAllCharacters()
     local count = 0
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            resetHead(player)
+    
+    for _, data in pairs(characters) do
+        if resetHead(data.character) then
             count = count + 1
         end
     end
@@ -325,27 +429,79 @@ ResetButton.MouseButton1Click:Connect(function()
     ResetButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
 end)
 
--- Handle new players
+-- Teleport functionality
+local function startTeleportLoop()
+    teleportConnection = RunService.Heartbeat:Connect(function()
+        if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            return
+        end
+        
+        local myPosition = LocalPlayer.Character.HumanoidRootPart.CFrame
+        local characters = getAllCharacters()
+        
+        for _, data in pairs(characters) do
+            local character = data.character
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            
+            if humanoidRootPart then
+                -- Calculate position 10 studs in front of the local player
+                local frontPosition = myPosition + myPosition.LookVector * 10
+                humanoidRootPart.CFrame = CFrame.new(frontPosition.Position)
+            end
+        end
+    end)
+end
+
+local function stopTeleportLoop()
+    if teleportConnection then
+        teleportConnection:Disconnect()
+        teleportConnection = nil
+    end
+end
+
+-- Teleport button
+TeleportButton.MouseButton1Click:Connect(function()
+    teleportLoop = not teleportLoop
+    
+    if teleportLoop then
+        TeleportButton.Text = "ON"
+        TeleportButton.BackgroundColor3 = Color3.fromRGB(60, 179, 113)
+        startTeleportLoop()
+        StatusLabel.Text = "Teleport loop: ACTIVE"
+    else
+        TeleportButton.Text = "OFF"
+        TeleportButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+        stopTeleportLoop()
+        StatusLabel.Text = "Teleport loop: DISABLED"
+    end
+end)
+
+-- Handle character respawning for persistence
+LocalPlayer.CharacterAdded:Connect(function()
+    wait(2) -- Wait for character to fully load
+    
+    -- Reapply head modifications if they were active
+    if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
+        local multiplier = tonumber(SizeSlider.Text)
+        local characters = getAllCharacters()
+        
+        for _, data in pairs(characters) do
+            modifyHead(data.character, multiplier)
+        end
+    end
+end)
+
+-- Handle new players/NPCs
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
-        wait(1) -- Wait for character to fully load
+        wait(1)
         if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
-            modifyHead(player, tonumber(SizeSlider.Text))
+            if player.Character and player ~= LocalPlayer then
+                modifyHead(player.Character, tonumber(SizeSlider.Text))
+            end
         end
     end)
 end)
-
--- Handle existing players respawning
-for _, player in pairs(Players:GetPlayers()) do
-    if player ~= LocalPlayer then
-        player.CharacterAdded:Connect(function()
-            wait(1)
-            if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
-                modifyHead(player, tonumber(SizeSlider.Text))
-            end
-        end)
-    end
-end
 
 -- Mobile support improvements
 if UserInputService.TouchEnabled then
@@ -353,9 +509,27 @@ if UserInputService.TouchEnabled then
     MainFrame.Draggable = true
     
     -- Improve touch responsiveness
-    for _, button in pairs({ApplyButton, ResetButton, SliderButton}) do
+    for _, button in pairs({ApplyButton, ResetButton, TeleportButton, SliderButton, CloseButton}) do
         button.AutoButtonColor = false
     end
 end
 
-StatusLabel.Text = "DAWFO HEADSHOTTA loaded successfully!"
+-- Workspace monitoring for new NPCs
+spawn(function()
+    while ScreenGui.Parent do
+        wait(5) -- Check every 5 seconds for new NPCs
+        
+        if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
+            local multiplier = tonumber(SizeSlider.Text)
+            local characters = getAllCharacters()
+            
+            for _, data in pairs(characters) do
+                if not originalHeadSizes[data.character] then
+                    modifyHead(data.character, multiplier)
+                end
+            end
+        end
+    end
+end)
+
+StatusLabel.Text = "DAWFO HEADSHOTTA V2 loaded successfully!"
