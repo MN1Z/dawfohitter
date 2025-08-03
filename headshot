@@ -15,6 +15,27 @@ if CoreGui:FindFirstChild("DawfoHeadShotta") then
     CoreGui.DawfoHeadShotta:Destroy()
 end
 
+-- Toggle Button
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ToggleButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+ToggleButton.BorderSizePixel = 2
+ToggleButton.Position = UDim2.new(0, 10, 0, 10)
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Text = "🐷🔫"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 20
+
+-- Add corner rounding
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 8)
+ToggleCorner.Parent = ToggleButton
+
+createRGBEffect(ToggleButton, "BorderColor3")
+
 -- Create main GUI in CoreGui for persistence
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
