@@ -1,5 +1,5 @@
 -- DAWFO HEADSHOTTA V2
--- Head Hitbox Expander + Player/NPC Teleporter with RGB UI + Whitelist
+-- Head Hitbox Expander + Player/NPC Teleporter with RGB UI + Advanced Whitelist
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -7,6 +7,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
+local Teams = game:GetService("Teams")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -31,6 +32,9 @@ local TeleportLabel = Instance.new("TextLabel")
 local TeleportButton = Instance.new("TextButton")
 local WhitelistFrame = Instance.new("Frame")
 local WhitelistLabel = Instance.new("TextLabel")
+local WhitelistModeFrame = Instance.new("Frame")
+local TeamModeButton = Instance.new("TextButton")
+local PlayerModeButton = Instance.new("TextButton")
 local PlayerDropdown = Instance.new("TextButton")
 local DropdownFrame = Instance.new("ScrollingFrame")
 local WhitelistStatus = Instance.new("TextLabel")
@@ -43,14 +47,14 @@ ScreenGui.Name = "DawfoHeadShotta"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Main Frame (increased height for whitelist section)
+-- Main Frame (increased height for enhanced whitelist section)
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
 MainFrame.BorderColor3 = Color3.fromRGB(139, 0, 0)
 MainFrame.BorderSizePixel = 3
 MainFrame.Position = UDim2.new(0.1, 0, 0.05, 0)
-MainFrame.Size = UDim2.new(0, 380, 0, 500)
+MainFrame.Size = UDim2.new(0, 380, 0, 580)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -103,8 +107,8 @@ HeadSizeFrame.Parent = MainFrame
 HeadSizeFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
 HeadSizeFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
 HeadSizeFrame.BorderSizePixel = 2
-HeadSizeFrame.Position = UDim2.new(0.05, 0, 0.08, 0)
-HeadSizeFrame.Size = UDim2.new(0.9, 0, 0.2, 0)
+HeadSizeFrame.Position = UDim2.new(0.05, 0, 0.07, 0)
+HeadSizeFrame.Size = UDim2.new(0.9, 0, 0.17, 0)
 
 local HeadSizeCorner = Instance.new("UICorner")
 HeadSizeCorner.CornerRadius = UDim.new(0, 10)
@@ -173,8 +177,8 @@ ApplyButton.Parent = MainFrame
 ApplyButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 ApplyButton.BorderColor3 = Color3.fromRGB(220, 20, 60)
 ApplyButton.BorderSizePixel = 2
-ApplyButton.Position = UDim2.new(0.05, 0, 0.3, 0)
-ApplyButton.Size = UDim2.new(0.4, 0, 0.08, 0)
+ApplyButton.Position = UDim2.new(0.05, 0, 0.25, 0)
+ApplyButton.Size = UDim2.new(0.4, 0, 0.07, 0)
 ApplyButton.Font = Enum.Font.GothamBold
 ApplyButton.Text = "APPLY HEADS"
 ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -190,8 +194,8 @@ ResetButton.Parent = MainFrame
 ResetButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
 ResetButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
 ResetButton.BorderSizePixel = 2
-ResetButton.Position = UDim2.new(0.55, 0, 0.3, 0)
-ResetButton.Size = UDim2.new(0.4, 0, 0.08, 0)
+ResetButton.Position = UDim2.new(0.55, 0, 0.25, 0)
+ResetButton.Size = UDim2.new(0.4, 0, 0.07, 0)
 ResetButton.Font = Enum.Font.GothamBold
 ResetButton.Text = "RESET HEADS"
 ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -201,14 +205,14 @@ local ResetCorner = Instance.new("UICorner")
 ResetCorner.CornerRadius = UDim.new(0, 8)
 ResetCorner.Parent = ResetButton
 
--- Whitelist Frame
+-- Whitelist Frame (expanded)
 WhitelistFrame.Name = "WhitelistFrame"
 WhitelistFrame.Parent = MainFrame
 WhitelistFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
 WhitelistFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
 WhitelistFrame.BorderSizePixel = 2
-WhitelistFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
-WhitelistFrame.Size = UDim2.new(0.9, 0, 0.22, 0)
+WhitelistFrame.Position = UDim2.new(0.05, 0, 0.34, 0)
+WhitelistFrame.Size = UDim2.new(0.9, 0, 0.28, 0)
 
 local WhitelistCorner = Instance.new("UICorner")
 WhitelistCorner.CornerRadius = UDim.new(0, 10)
@@ -219,12 +223,53 @@ WhitelistLabel.Name = "WhitelistLabel"
 WhitelistLabel.Parent = WhitelistFrame
 WhitelistLabel.BackgroundTransparency = 1
 WhitelistLabel.Position = UDim2.new(0, 10, 0, 5)
-WhitelistLabel.Size = UDim2.new(0.9, 0, 0.25, 0)
+WhitelistLabel.Size = UDim2.new(0.9, 0, 0.15, 0)
 WhitelistLabel.Font = Enum.Font.Gotham
-WhitelistLabel.Text = "Player Whitelist (Exempt from effects):"
+WhitelistLabel.Text = "Whitelist Settings (Exempt from effects):"
 WhitelistLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
 WhitelistLabel.TextScaled = true
 WhitelistLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Whitelist Mode Frame
+WhitelistModeFrame.Name = "WhitelistModeFrame"
+WhitelistModeFrame.Parent = WhitelistFrame
+WhitelistModeFrame.BackgroundTransparency = 1
+WhitelistModeFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+WhitelistModeFrame.Size = UDim2.new(0.9, 0, 0.2, 0)
+
+-- Team Mode Button
+TeamModeButton.Name = "TeamModeButton"
+TeamModeButton.Parent = WhitelistModeFrame
+TeamModeButton.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+TeamModeButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+TeamModeButton.BorderSizePixel = 2
+TeamModeButton.Position = UDim2.new(0, 0, 0, 0)
+TeamModeButton.Size = UDim2.new(0.45, 0, 1, 0)
+TeamModeButton.Font = Enum.Font.GothamBold
+TeamModeButton.Text = "MY TEAM"
+TeamModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeamModeButton.TextScaled = true
+
+local TeamModeCorner = Instance.new("UICorner")
+TeamModeCorner.CornerRadius = UDim.new(0, 6)
+TeamModeCorner.Parent = TeamModeButton
+
+-- Player Mode Button
+PlayerModeButton.Name = "PlayerModeButton"
+PlayerModeButton.Parent = WhitelistModeFrame
+PlayerModeButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+PlayerModeButton.BorderColor3 = Color3.fromRGB(220, 20, 60)
+PlayerModeButton.BorderSizePixel = 2
+PlayerModeButton.Position = UDim2.new(0.55, 0, 0, 0)
+PlayerModeButton.Size = UDim2.new(0.45, 0, 1, 0)
+PlayerModeButton.Font = Enum.Font.GothamBold
+PlayerModeButton.Text = "PLAYER"
+PlayerModeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayerModeButton.TextScaled = true
+
+local PlayerModeCorner = Instance.new("UICorner")
+PlayerModeCorner.CornerRadius = UDim.new(0, 6)
+PlayerModeCorner.Parent = PlayerModeButton
 
 -- Player Dropdown
 PlayerDropdown.Name = "PlayerDropdown"
@@ -232,8 +277,8 @@ PlayerDropdown.Parent = WhitelistFrame
 PlayerDropdown.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
 PlayerDropdown.BorderColor3 = Color3.fromRGB(139, 0, 0)
 PlayerDropdown.BorderSizePixel = 2
-PlayerDropdown.Position = UDim2.new(0.05, 0, 0.35, 0)
-PlayerDropdown.Size = UDim2.new(0.6, 0, 0.25, 0)
+PlayerDropdown.Position = UDim2.new(0.05, 0, 0.45, 0)
+PlayerDropdown.Size = UDim2.new(0.6, 0, 0.18, 0)
 PlayerDropdown.Font = Enum.Font.GothamBold
 PlayerDropdown.Text = "Select Player ▼"
 PlayerDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -249,8 +294,8 @@ ClearWhitelistButton.Parent = WhitelistFrame
 ClearWhitelistButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
 ClearWhitelistButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
 ClearWhitelistButton.BorderSizePixel = 2
-ClearWhitelistButton.Position = UDim2.new(0.7, 0, 0.35, 0)
-ClearWhitelistButton.Size = UDim2.new(0.25, 0, 0.25, 0)
+ClearWhitelistButton.Position = UDim2.new(0.7, 0, 0.45, 0)
+ClearWhitelistButton.Size = UDim2.new(0.25, 0, 0.18, 0)
 ClearWhitelistButton.Font = Enum.Font.GothamBold
 ClearWhitelistButton.Text = "CLEAR"
 ClearWhitelistButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -267,7 +312,7 @@ WhitelistStatus.BackgroundTransparency = 1
 WhitelistStatus.Position = UDim2.new(0.05, 0, 0.7, 0)
 WhitelistStatus.Size = UDim2.new(0.9, 0, 0.25, 0)
 WhitelistStatus.Font = Enum.Font.Gotham
-WhitelistStatus.Text = "No player whitelisted"
+WhitelistStatus.Text = "Mode: Player Selection | No player whitelisted"
 WhitelistStatus.TextColor3 = Color3.fromRGB(255, 255, 100)
 WhitelistStatus.TextScaled = true
 WhitelistStatus.TextXAlignment = Enum.TextXAlignment.Left
@@ -278,7 +323,7 @@ DropdownFrame.Parent = WhitelistFrame
 DropdownFrame.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
 DropdownFrame.BorderColor3 = Color3.fromRGB(139, 0, 0)
 DropdownFrame.BorderSizePixel = 2
-DropdownFrame.Position = UDim2.new(0.05, 0, 0.65, 0)
+DropdownFrame.Position = UDim2.new(0.05, 0, 0.68, 0)
 DropdownFrame.Size = UDim2.new(0.6, 0, 0, 120)
 DropdownFrame.Visible = false
 DropdownFrame.ScrollBarThickness = 8
@@ -295,7 +340,7 @@ TeleportFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
 TeleportFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
 TeleportFrame.BorderSizePixel = 2
 TeleportFrame.Position = UDim2.new(0.05, 0, 0.64, 0)
-TeleportFrame.Size = UDim2.new(0.9, 0, 0.12, 0)
+TeleportFrame.Size = UDim2.new(0.9, 0, 0.1, 0)
 
 local TeleportCorner = Instance.new("UICorner")
 TeleportCorner.CornerRadius = UDim.new(0, 10)
@@ -334,8 +379,8 @@ TeleportButtonCorner.Parent = TeleportButton
 StatusLabel.Name = "StatusLabel"
 StatusLabel.Parent = MainFrame
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(0.05, 0, 0.8, 0)
-StatusLabel.Size = UDim2.new(0.9, 0, 0.15, 0)
+StatusLabel.Position = UDim2.new(0.05, 0, 0.77, 0)
+StatusLabel.Size = UDim2.new(0.9, 0, 0.18, 0)
 StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.Text = "Ready to modify heads and teleport..."
 StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
@@ -347,6 +392,7 @@ local isDragging = false
 local teleportLoop = false
 local teleportConnection = nil
 local whitelistedPlayer = nil
+local whitelistMode = "player" -- "player" or "team"
 local dropdownOpen = false
 
 -- RGB Animation
@@ -368,6 +414,52 @@ end)
 -- Close button functionality
 CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
+end)
+
+-- Whitelist Mode Switching
+local function updateWhitelistMode(mode)
+    whitelistMode = mode
+    
+    if mode == "team" then
+        TeamModeButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+        TeamModeButton.BorderColor3 = Color3.fromRGB(220, 20, 60)
+        PlayerModeButton.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+        PlayerModeButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+        
+        PlayerDropdown.Visible = false
+        ClearWhitelistButton.Position = UDim2.new(0.35, 0, 0.45, 0)
+        ClearWhitelistButton.Size = UDim2.new(0.6, 0, 0.18, 0)
+        
+        local teamName = "No Team"
+        if LocalPlayer.Team then
+            teamName = LocalPlayer.Team.Name
+        end
+        WhitelistStatus.Text = "Mode: Team Whitelist | Protected: " .. teamName
+    else
+        PlayerModeButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+        PlayerModeButton.BorderColor3 = Color3.fromRGB(220, 20, 60)
+        TeamModeButton.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+        TeamModeButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+        
+        PlayerDropdown.Visible = true
+        ClearWhitelistButton.Position = UDim2.new(0.7, 0, 0.45, 0)
+        ClearWhitelistButton.Size = UDim2.new(0.25, 0, 0.18, 0)
+        
+        local playerText = whitelistedPlayer and whitelistedPlayer.Name or "No player whitelisted"
+        WhitelistStatus.Text = "Mode: Player Selection | " .. playerText
+    end
+end
+
+TeamModeButton.MouseButton1Click:Connect(function()
+    updateWhitelistMode("team")
+    DropdownFrame.Visible = false
+    dropdownOpen = false
+end)
+
+PlayerModeButton.MouseButton1Click:Connect(function()
+    updateWhitelistMode("player")
+    DropdownFrame.Visible = false
+    dropdownOpen = false
 end)
 
 -- Slider functionality
@@ -447,7 +539,7 @@ local function updateDropdown()
             playerButton.MouseButton1Click:Connect(function()
                 whitelistedPlayer = player
                 PlayerDropdown.Text = player.Name .. " ✓"
-                WhitelistStatus.Text = "Whitelisted: " .. player.Name
+                WhitelistStatus.Text = "Mode: Player Selection | Whitelisted: " .. player.Name
                 DropdownFrame.Visible = false
                 dropdownOpen = false
             end)
@@ -469,20 +561,25 @@ end
 
 -- Dropdown functionality
 PlayerDropdown.MouseButton1Click:Connect(function()
-    dropdownOpen = not dropdownOpen
-    if dropdownOpen then
-        updateDropdown()
-        DropdownFrame.Visible = true
-    else
-        DropdownFrame.Visible = false
+    if whitelistMode == "player" then
+        dropdownOpen = not dropdownOpen
+        if dropdownOpen then
+            updateDropdown()
+            DropdownFrame.Visible = true
+        else
+            DropdownFrame.Visible = false
+        end
     end
 end)
 
 -- Clear whitelist
 ClearWhitelistButton.MouseButton1Click:Connect(function()
-    whitelistedPlayer = nil
-    PlayerDropdown.Text = "Select Player ▼"
-    WhitelistStatus.Text = "No player whitelisted"
+    if whitelistMode == "player" then
+        whitelistedPlayer = nil
+        PlayerDropdown.Text = "Select Player ▼"
+        WhitelistStatus.Text = "Mode: Player Selection | No player whitelisted"
+    end
+    
     DropdownFrame.Visible = false
     dropdownOpen = false
     
@@ -502,18 +599,35 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Get all characters (players and NPCs) excluding whitelisted
+-- Enhanced get all characters function with team/player whitelist support
 local function getAllCharacters()
     local characters = {}
     
     -- Get player characters
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player ~= whitelistedPlayer and player.Character and player.Character:FindFirstChild("Head") then
-            table.insert(characters, {character = player.Character, name = player.Name, isPlayer = true})
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local shouldExclude = false
+            
+            -- Check whitelist based on mode
+            if whitelistMode == "team" then
+                -- Exclude players on the same team as LocalPlayer
+                if LocalPlayer.Team and player.Team == LocalPlayer.Team then
+                    shouldExclude = true
+                end
+            elseif whitelistMode == "player" then
+                -- Exclude specific whitelisted player
+                if player == whitelistedPlayer then
+                    shouldExclude = true
+                end
+            end
+            
+            if not shouldExclude then
+                table.insert(characters, {character = player.Character, name = player.Name, isPlayer = true})
+            end
         end
     end
     
-    -- Get NPC characters
+    -- Get NPC characters (NPCs don't have teams, so only player whitelist affects them)
     for _, obj in pairs(Workspace:GetDescendants()) do
         if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("Head") then
             local isPlayerCharacter = false
@@ -525,6 +639,7 @@ local function getAllCharacters()
             end
             
             if not isPlayerCharacter and obj ~= LocalPlayer.Character then
+                -- NPCs are not affected by team whitelist, only by player whitelist if they were somehow a "player"
                 table.insert(characters, {character = obj, name = obj.Name, isPlayer = false})
             end
         end
@@ -585,7 +700,14 @@ ApplyButton.MouseButton1Click:Connect(function()
         end
     end
     
-    local whitelistText = whitelistedPlayer and " (Excluded: " .. whitelistedPlayer.Name .. ")" or ""
+    local whitelistText = ""
+    if whitelistMode == "team" then
+        local teamName = LocalPlayer.Team and LocalPlayer.Team.Name or "No Team"
+        whitelistText = " (Protected Team: " .. teamName .. ")"
+    elseif whitelistMode == "player" and whitelistedPlayer then
+        whitelistText = " (Protected: " .. whitelistedPlayer.Name .. ")"
+    end
+    
     StatusLabel.Text = string.format("Modified %d heads with %dx multiplier%s", count, multiplier, whitelistText)
     
     -- Button feedback
@@ -614,7 +736,7 @@ ResetButton.MouseButton1Click:Connect(function()
     ResetButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
 end)
 
--- Teleport functionality
+-- Enhanced teleport functionality with whitelist support
 local function startTeleportLoop()
     teleportConnection = RunService.Heartbeat:Connect(function()
         if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -652,7 +774,15 @@ TeleportButton.MouseButton1Click:Connect(function()
         TeleportButton.Text = "ON"
         TeleportButton.BackgroundColor3 = Color3.fromRGB(60, 179, 113)
         startTeleportLoop()
-        local whitelistText = whitelistedPlayer and " (Excluded: " .. whitelistedPlayer.Name .. ")" or ""
+        
+        local whitelistText = ""
+        if whitelistMode == "team" then
+            local teamName = LocalPlayer.Team and LocalPlayer.Team.Name or "No Team"
+            whitelistText = " (Protected Team: " .. teamName .. ")"
+        elseif whitelistMode == "player" and whitelistedPlayer then
+            whitelistText = " (Protected: " .. whitelistedPlayer.Name .. ")"
+        end
+        
         StatusLabel.Text = "Teleport loop: ACTIVE" .. whitelistText
     else
         TeleportButton.Text = "OFF"
@@ -666,6 +796,12 @@ end)
 LocalPlayer.CharacterAdded:Connect(function()
     wait(2) -- Wait for character to fully load
     
+    -- Update team whitelist status if in team mode
+    if whitelistMode == "team" then
+        local teamName = LocalPlayer.Team and LocalPlayer.Team.Name or "No Team"
+        WhitelistStatus.Text = "Mode: Team Whitelist | Protected: " .. teamName
+    end
+    
     -- Reapply head modifications if they were active
     if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
         local multiplier = tonumber(SizeSlider.Text)
@@ -677,12 +813,35 @@ LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
+-- Handle team changes
+if LocalPlayer.Team then
+    LocalPlayer:GetPropertyChangedSignal("Team"):Connect(function()
+        if whitelistMode == "team" then
+            local teamName = LocalPlayer.Team and LocalPlayer.Team.Name or "No Team"
+            WhitelistStatus.Text = "Mode: Team Whitelist | Protected: " .. teamName
+        end
+    end)
+end
+
 -- Handle new players/NPCs
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         wait(1)
-        if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 and player ~= whitelistedPlayer then
-            if player.Character and player ~= LocalPlayer then
+        if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 and player ~= LocalPlayer then
+            -- Check if player should be excluded based on current whitelist settings
+            local shouldExclude = false
+            
+            if whitelistMode == "team" then
+                if LocalPlayer.Team and player.Team == LocalPlayer.Team then
+                    shouldExclude = true
+                end
+            elseif whitelistMode == "player" then
+                if player == whitelistedPlayer then
+                    shouldExclude = true
+                end
+            end
+            
+            if not shouldExclude and player.Character then
                 modifyHead(player.Character, tonumber(SizeSlider.Text))
             end
         end
@@ -694,7 +853,7 @@ Players.PlayerRemoving:Connect(function(player)
     if player == whitelistedPlayer then
         whitelistedPlayer = nil
         PlayerDropdown.Text = "Select Player ▼"
-        WhitelistStatus.Text = "Whitelisted player left - cleared"
+        WhitelistStatus.Text = "Mode: Player Selection | Whitelisted player left - cleared"
     end
 end)
 
@@ -704,7 +863,7 @@ if UserInputService.TouchEnabled then
     MainFrame.Draggable = true
     
     -- Improve touch responsiveness
-    for _, button in pairs({ApplyButton, ResetButton, TeleportButton, SliderButton, CloseButton, PlayerDropdown, ClearWhitelistButton}) do
+    for _, button in pairs({ApplyButton, ResetButton, TeleportButton, SliderButton, CloseButton, PlayerDropdown, ClearWhitelistButton, TeamModeButton, PlayerModeButton}) do
         button.AutoButtonColor = false
     end
 end
@@ -727,4 +886,7 @@ spawn(function()
     end
 end)
 
-StatusLabel.Text = "DAWFO HEADSHOTTA V2 loaded successfully!"
+-- Initialize with player mode
+updateWhitelistMode("player")
+
+StatusLabel.Text = "DAWFO HEADSHOTTA V2 ENHANCED loaded successfully!"
