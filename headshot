@@ -1,5 +1,5 @@
 -- DAWFO HEADSHOTTA V2
--- Head Hitbox Expander + Player/NPC Teleporter with RGB UI
+-- Head Hitbox Expander + Player/NPC Teleporter with RGB UI + Whitelist
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -29,6 +29,12 @@ local ResetButton = Instance.new("TextButton")
 local TeleportFrame = Instance.new("Frame")
 local TeleportLabel = Instance.new("TextLabel")
 local TeleportButton = Instance.new("TextButton")
+local WhitelistFrame = Instance.new("Frame")
+local WhitelistLabel = Instance.new("TextLabel")
+local PlayerDropdown = Instance.new("TextButton")
+local DropdownFrame = Instance.new("ScrollingFrame")
+local WhitelistStatus = Instance.new("TextLabel")
+local ClearWhitelistButton = Instance.new("TextButton")
 local StatusLabel = Instance.new("TextLabel")
 local CloseButton = Instance.new("TextButton")
 
@@ -37,14 +43,14 @@ ScreenGui.Name = "DawfoHeadShotta"
 ScreenGui.Parent = CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Main Frame
+-- Main Frame (increased height for whitelist section)
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
 MainFrame.BorderColor3 = Color3.fromRGB(139, 0, 0)
 MainFrame.BorderSizePixel = 3
-MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
-MainFrame.Size = UDim2.new(0, 380, 0, 400)
+MainFrame.Position = UDim2.new(0.1, 0, 0.05, 0)
+MainFrame.Size = UDim2.new(0, 380, 0, 500)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -83,7 +89,7 @@ TitleLabel.Name = "TitleLabel"
 TitleLabel.Parent = MainFrame
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Position = UDim2.new(0, 0, 0, 0)
-TitleLabel.Size = UDim2.new(0.85, 0, 0, 45)
+TitleLabel.Size = UDim2.new(0.85, 0, 0, 36)
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.Text = "DAWFO HEADSHOTTA"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -97,8 +103,8 @@ HeadSizeFrame.Parent = MainFrame
 HeadSizeFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
 HeadSizeFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
 HeadSizeFrame.BorderSizePixel = 2
-HeadSizeFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-HeadSizeFrame.Size = UDim2.new(0.9, 0, 0.25, 0)
+HeadSizeFrame.Position = UDim2.new(0.05, 0, 0.08, 0)
+HeadSizeFrame.Size = UDim2.new(0.9, 0, 0.2, 0)
 
 local HeadSizeCorner = Instance.new("UICorner")
 HeadSizeCorner.CornerRadius = UDim.new(0, 10)
@@ -167,8 +173,8 @@ ApplyButton.Parent = MainFrame
 ApplyButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 ApplyButton.BorderColor3 = Color3.fromRGB(220, 20, 60)
 ApplyButton.BorderSizePixel = 2
-ApplyButton.Position = UDim2.new(0.05, 0, 0.45, 0)
-ApplyButton.Size = UDim2.new(0.4, 0, 0.12, 0)
+ApplyButton.Position = UDim2.new(0.05, 0, 0.3, 0)
+ApplyButton.Size = UDim2.new(0.4, 0, 0.08, 0)
 ApplyButton.Font = Enum.Font.GothamBold
 ApplyButton.Text = "APPLY HEADS"
 ApplyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -184,8 +190,8 @@ ResetButton.Parent = MainFrame
 ResetButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
 ResetButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
 ResetButton.BorderSizePixel = 2
-ResetButton.Position = UDim2.new(0.55, 0, 0.45, 0)
-ResetButton.Size = UDim2.new(0.4, 0, 0.12, 0)
+ResetButton.Position = UDim2.new(0.55, 0, 0.3, 0)
+ResetButton.Size = UDim2.new(0.4, 0, 0.08, 0)
 ResetButton.Font = Enum.Font.GothamBold
 ResetButton.Text = "RESET HEADS"
 ResetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -195,14 +201,101 @@ local ResetCorner = Instance.new("UICorner")
 ResetCorner.CornerRadius = UDim.new(0, 8)
 ResetCorner.Parent = ResetButton
 
+-- Whitelist Frame
+WhitelistFrame.Name = "WhitelistFrame"
+WhitelistFrame.Parent = MainFrame
+WhitelistFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+WhitelistFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
+WhitelistFrame.BorderSizePixel = 2
+WhitelistFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
+WhitelistFrame.Size = UDim2.new(0.9, 0, 0.22, 0)
+
+local WhitelistCorner = Instance.new("UICorner")
+WhitelistCorner.CornerRadius = UDim.new(0, 10)
+WhitelistCorner.Parent = WhitelistFrame
+
+-- Whitelist Label
+WhitelistLabel.Name = "WhitelistLabel"
+WhitelistLabel.Parent = WhitelistFrame
+WhitelistLabel.BackgroundTransparency = 1
+WhitelistLabel.Position = UDim2.new(0, 10, 0, 5)
+WhitelistLabel.Size = UDim2.new(0.9, 0, 0.25, 0)
+WhitelistLabel.Font = Enum.Font.Gotham
+WhitelistLabel.Text = "Player Whitelist (Exempt from effects):"
+WhitelistLabel.TextColor3 = Color3.fromRGB(255, 200, 200)
+WhitelistLabel.TextScaled = true
+WhitelistLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Player Dropdown
+PlayerDropdown.Name = "PlayerDropdown"
+PlayerDropdown.Parent = WhitelistFrame
+PlayerDropdown.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+PlayerDropdown.BorderColor3 = Color3.fromRGB(139, 0, 0)
+PlayerDropdown.BorderSizePixel = 2
+PlayerDropdown.Position = UDim2.new(0.05, 0, 0.35, 0)
+PlayerDropdown.Size = UDim2.new(0.6, 0, 0.25, 0)
+PlayerDropdown.Font = Enum.Font.GothamBold
+PlayerDropdown.Text = "Select Player ▼"
+PlayerDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayerDropdown.TextScaled = true
+
+local DropdownCorner = Instance.new("UICorner")
+DropdownCorner.CornerRadius = UDim.new(0, 6)
+DropdownCorner.Parent = PlayerDropdown
+
+-- Clear Whitelist Button
+ClearWhitelistButton.Name = "ClearWhitelistButton"
+ClearWhitelistButton.Parent = WhitelistFrame
+ClearWhitelistButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+ClearWhitelistButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+ClearWhitelistButton.BorderSizePixel = 2
+ClearWhitelistButton.Position = UDim2.new(0.7, 0, 0.35, 0)
+ClearWhitelistButton.Size = UDim2.new(0.25, 0, 0.25, 0)
+ClearWhitelistButton.Font = Enum.Font.GothamBold
+ClearWhitelistButton.Text = "CLEAR"
+ClearWhitelistButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClearWhitelistButton.TextScaled = true
+
+local ClearCorner = Instance.new("UICorner")
+ClearCorner.CornerRadius = UDim.new(0, 6)
+ClearCorner.Parent = ClearWhitelistButton
+
+-- Whitelist Status
+WhitelistStatus.Name = "WhitelistStatus"
+WhitelistStatus.Parent = WhitelistFrame
+WhitelistStatus.BackgroundTransparency = 1
+WhitelistStatus.Position = UDim2.new(0.05, 0, 0.7, 0)
+WhitelistStatus.Size = UDim2.new(0.9, 0, 0.25, 0)
+WhitelistStatus.Font = Enum.Font.Gotham
+WhitelistStatus.Text = "No player whitelisted"
+WhitelistStatus.TextColor3 = Color3.fromRGB(255, 255, 100)
+WhitelistStatus.TextScaled = true
+WhitelistStatus.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Dropdown Frame
+DropdownFrame.Name = "DropdownFrame"
+DropdownFrame.Parent = WhitelistFrame
+DropdownFrame.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+DropdownFrame.BorderColor3 = Color3.fromRGB(139, 0, 0)
+DropdownFrame.BorderSizePixel = 2
+DropdownFrame.Position = UDim2.new(0.05, 0, 0.65, 0)
+DropdownFrame.Size = UDim2.new(0.6, 0, 0, 120)
+DropdownFrame.Visible = false
+DropdownFrame.ScrollBarThickness = 8
+DropdownFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local DropdownFrameCorner = Instance.new("UICorner")
+DropdownFrameCorner.CornerRadius = UDim.new(0, 6)
+DropdownFrameCorner.Parent = DropdownFrame
+
 -- Teleport Frame
 TeleportFrame.Name = "TeleportFrame"
 TeleportFrame.Parent = MainFrame
 TeleportFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
 TeleportFrame.BorderColor3 = Color3.fromRGB(100, 0, 0)
 TeleportFrame.BorderSizePixel = 2
-TeleportFrame.Position = UDim2.new(0.05, 0, 0.62, 0)
-TeleportFrame.Size = UDim2.new(0.9, 0, 0.15, 0)
+TeleportFrame.Position = UDim2.new(0.05, 0, 0.64, 0)
+TeleportFrame.Size = UDim2.new(0.9, 0, 0.12, 0)
 
 local TeleportCorner = Instance.new("UICorner")
 TeleportCorner.CornerRadius = UDim.new(0, 10)
@@ -241,7 +334,7 @@ TeleportButtonCorner.Parent = TeleportButton
 StatusLabel.Name = "StatusLabel"
 StatusLabel.Parent = MainFrame
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(0.05, 0, 0.82, 0)
+StatusLabel.Position = UDim2.new(0.05, 0, 0.8, 0)
 StatusLabel.Size = UDim2.new(0.9, 0, 0.15, 0)
 StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.Text = "Ready to modify heads and teleport..."
@@ -253,6 +346,8 @@ local originalHeadSizes = {}
 local isDragging = false
 local teleportLoop = false
 local teleportConnection = nil
+local whitelistedPlayer = nil
+local dropdownOpen = false
 
 -- RGB Animation
 spawn(function()
@@ -318,13 +413,102 @@ SizeSlider.FocusLost:Connect(function()
     end
 end)
 
--- Get all characters (players and NPCs)
+-- Whitelist functions
+local function updateDropdown()
+    -- Clear existing dropdown items
+    for _, child in pairs(DropdownFrame:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    local yPos = 0
+    local itemHeight = 25
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local playerButton = Instance.new("TextButton")
+            playerButton.Name = player.Name
+            playerButton.Parent = DropdownFrame
+            playerButton.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
+            playerButton.BorderColor3 = Color3.fromRGB(139, 0, 0)
+            playerButton.BorderSizePixel = 1
+            playerButton.Position = UDim2.new(0, 0, 0, yPos)
+            playerButton.Size = UDim2.new(1, -10, 0, itemHeight)
+            playerButton.Font = Enum.Font.Gotham
+            playerButton.Text = player.Name
+            playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            playerButton.TextScaled = true
+            
+            local buttonCorner = Instance.new("UICorner")
+            buttonCorner.CornerRadius = UDim.new(0, 4)
+            buttonCorner.Parent = playerButton
+            
+            playerButton.MouseButton1Click:Connect(function()
+                whitelistedPlayer = player
+                PlayerDropdown.Text = player.Name .. " ✓"
+                WhitelistStatus.Text = "Whitelisted: " .. player.Name
+                DropdownFrame.Visible = false
+                dropdownOpen = false
+            end)
+            
+            playerButton.MouseEnter:Connect(function()
+                playerButton.BackgroundColor3 = Color3.fromRGB(100, 20, 20)
+            end)
+            
+            playerButton.MouseLeave:Connect(function()
+                playerButton.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
+            end)
+            
+            yPos = yPos + itemHeight + 2
+        end
+    end
+    
+    DropdownFrame.CanvasSize = UDim2.new(0, 0, 0, yPos)
+end
+
+-- Dropdown functionality
+PlayerDropdown.MouseButton1Click:Connect(function()
+    dropdownOpen = not dropdownOpen
+    if dropdownOpen then
+        updateDropdown()
+        DropdownFrame.Visible = true
+    else
+        DropdownFrame.Visible = false
+    end
+end)
+
+-- Clear whitelist
+ClearWhitelistButton.MouseButton1Click:Connect(function()
+    whitelistedPlayer = nil
+    PlayerDropdown.Text = "Select Player ▼"
+    WhitelistStatus.Text = "No player whitelisted"
+    DropdownFrame.Visible = false
+    dropdownOpen = false
+    
+    -- Button feedback
+    ClearWhitelistButton.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+    wait(0.2)
+    ClearWhitelistButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+end)
+
+-- Close dropdown when clicking elsewhere
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and not gameProcessed then
+        if dropdownOpen then
+            DropdownFrame.Visible = false
+            dropdownOpen = false
+        end
+    end
+end)
+
+-- Get all characters (players and NPCs) excluding whitelisted
 local function getAllCharacters()
     local characters = {}
     
     -- Get player characters
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+        if player ~= LocalPlayer and player ~= whitelistedPlayer and player.Character and player.Character:FindFirstChild("Head") then
             table.insert(characters, {character = player.Character, name = player.Name, isPlayer = true})
         end
     end
@@ -401,7 +585,8 @@ ApplyButton.MouseButton1Click:Connect(function()
         end
     end
     
-    StatusLabel.Text = string.format("Modified %d heads with %dx multiplier", count, multiplier)
+    local whitelistText = whitelistedPlayer and " (Excluded: " .. whitelistedPlayer.Name .. ")" or ""
+    StatusLabel.Text = string.format("Modified %d heads with %dx multiplier%s", count, multiplier, whitelistText)
     
     -- Button feedback
     ApplyButton.BackgroundColor3 = Color3.fromRGB(60, 179, 113)
@@ -467,7 +652,8 @@ TeleportButton.MouseButton1Click:Connect(function()
         TeleportButton.Text = "ON"
         TeleportButton.BackgroundColor3 = Color3.fromRGB(60, 179, 113)
         startTeleportLoop()
-        StatusLabel.Text = "Teleport loop: ACTIVE"
+        local whitelistText = whitelistedPlayer and " (Excluded: " .. whitelistedPlayer.Name .. ")" or ""
+        StatusLabel.Text = "Teleport loop: ACTIVE" .. whitelistText
     else
         TeleportButton.Text = "OFF"
         TeleportButton.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
@@ -495,12 +681,21 @@ end)
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         wait(1)
-        if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 then
+        if tonumber(SizeSlider.Text) and tonumber(SizeSlider.Text) > 5 and player ~= whitelistedPlayer then
             if player.Character and player ~= LocalPlayer then
                 modifyHead(player.Character, tonumber(SizeSlider.Text))
             end
         end
     end)
+end)
+
+-- Handle player leaving (clear whitelist if whitelisted player leaves)
+Players.PlayerRemoving:Connect(function(player)
+    if player == whitelistedPlayer then
+        whitelistedPlayer = nil
+        PlayerDropdown.Text = "Select Player ▼"
+        WhitelistStatus.Text = "Whitelisted player left - cleared"
+    end
 end)
 
 -- Mobile support improvements
@@ -509,7 +704,7 @@ if UserInputService.TouchEnabled then
     MainFrame.Draggable = true
     
     -- Improve touch responsiveness
-    for _, button in pairs({ApplyButton, ResetButton, TeleportButton, SliderButton, CloseButton}) do
+    for _, button in pairs({ApplyButton, ResetButton, TeleportButton, SliderButton, CloseButton, PlayerDropdown, ClearWhitelistButton}) do
         button.AutoButtonColor = false
     end
 end
